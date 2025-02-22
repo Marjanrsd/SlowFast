@@ -35,6 +35,8 @@ class VideoDataset(Dataset):
 
     def __getitem__(self, index):
         # loading and preprocessing. TODO move them to transform classes
+        # notice loadvideo returns our buffer (i.e. 4d clip tensor)
+        # it is taking a filename (i.e. fname) from our dataset
         buffer = self.loadvideo(self.fnames[index])
 
         while buffer.shape[0]<self.clip_len+2 :
