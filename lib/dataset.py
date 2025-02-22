@@ -47,6 +47,10 @@ class VideoDataset(Dataset):
         buffer = self.normalize(buffer)
         buffer = self.to_tensor(buffer)
 
+        # our input to the network and label
+        # 2d resnet's input would be 3D.
+        # 3d resnet's is a clip that is 4d.
+        # buffer == clip == sequence of frames
         return buffer, self.label_array[index]
 
     def to_tensor(self, buffer):
