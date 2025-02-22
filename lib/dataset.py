@@ -37,6 +37,7 @@ class VideoDataset(Dataset):
         # loading and preprocessing. TODO move them to transform classes
         # notice loadvideo returns our buffer (i.e. 4d clip tensor)
         # it is taking a filename (i.e. fname) from our dataset
+        # and loading it into a 4D pytorch tensor.
         buffer = self.loadvideo(self.fnames[index])
 
         while buffer.shape[0]<self.clip_len+2 :
