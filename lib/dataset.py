@@ -64,6 +64,7 @@ class VideoDataset(Dataset):
     def loadvideo(self, fname):
         remainder = np.random.randint(self.frame_sample_rate)
         # initialize a VideoCapture object to read video data into a numpy array
+        # cv2 is opencv2, a fast python library for doing image and video processing fxs
         capture = cv2.VideoCapture(fname)
         frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
