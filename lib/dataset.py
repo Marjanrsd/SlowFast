@@ -103,7 +103,7 @@ class VideoDataset(Dataset):
             if count < start_idx:
                 count += 1
                 continue
-            # the first var from read() is whether it's the video is empty/done
+            # the first var from read() is whether the video is empty/done
             if retaining is False or count > end_idx:
                 break
             # skip but every Nth frames and don't go over our limit of frames per clip(?)   
