@@ -48,6 +48,8 @@ class VideoDataset(Dataset):
         if self.mode == 'train' or self.mode == 'training':
             # here's some data-aug
             buffer = self.randomflip(buffer)
+            # could probably benefit from adding this too:
+            # https://tinyurl.com/629xj3k9
         buffer = self.crop(buffer, self.clip_len, self.crop_size)
         buffer = self.normalize(buffer)
         buffer = self.to_tensor(buffer)
