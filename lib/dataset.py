@@ -90,23 +90,15 @@ class VideoDataset(Dataset):
 
         # create a buffer. Must have dtype float, so it gets converted to a FloatTensor by Pytorch later
         start_idx = 0
-        end_idx = frame_count-1
-        # self.frame_sample_rate == 1; Used for skipping frames, see next occurances.
-        frame_count_sample = frame_count // self.frame_sample_rate - 1
-        # they limit the number of frames to a clip to 300 for some reason
-        # if it is longer we take a random, continuous sample of 300 frames
-        if frame_count>300:
-            end_idx = np.random.randint(300, frame_count)
-            start_idx = end_idx - 300
-            frame_count_sample = 301 // self.frame_sample_rate - 1
+        end_idx = frame_count - 1
+        frame_count_sample = frame_count - 1
+ 
         # Z-dim (i.e. time), Y-dim, X-dim, RGB-dim
         buffer = np.empty((frame_count_sample, resize_height, resize_width, 3), np.dtype('float32'))
 
         count = 0
         # doesn't have to be initialized technically
         retaining = True
-        # the current number of frames loaded into the clip's buffer (i.e. 4D tensor)
-        sample_count = 0
 
         # read in each frame, (potentially) one at a time into the numpy buffer array
         while (count <= end_idx and retaining):
@@ -118,16 +110,12 @@ class VideoDataset(Dataset):
             # the first var from read() is whether the video is empty/done
             if retaining is False or count > end_idx:
                 break
-            # skip but every Nth frames and don't go over our limit of frames per clip(?)   
-            if count % self.frame_sample_rate == remainder and sample_count < frame_count_sample:
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                # will resize frames if not already final size
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # will resize frames if not already final size
 
-                if (frame_height != resize_height) or (frame_width != resize_width):
-                    frame = cv2.resize(frame, (resize_width, resize_height))
-                buffer[sample_count] = frame
-                sample_count = sample_count + 1
-            # whether that last video frame was included or not, increase the vid frame counter
+            if (frame_height != resize_height) or (frame_width != resize_width):
+                frame = cv2.resize(frame, (resize_width, resize_height))
+            buffer[count] = frame
             count += 1
         capture.release() # we're done with the video object from opencv-2
         return buffer
