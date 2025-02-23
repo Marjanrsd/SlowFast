@@ -9,7 +9,13 @@ from torch.utils.data import DataLoader, Dataset
 class VideoDataset(Dataset):
 
     def __init__(self, directory, mode='train', clip_len=8, frame_sample_rate=1):
-        # @TODO make train mode grab from 3 folders and test from the remaining (i.e. summer)
+        self.clip_len = clip_len
+        self.short_side = [128, 160]
+        self.crop_size = 112
+        self.frame_sample_rate = frame_sample_rate
+        self.mode = mode
+        self.fnames, labels = [], []
+        
         if mode == 'train' or mode == 'training':
             spring = os.path.join(directory, "spring.webm")
             fall = os.path.join(directory, "fall.mp4")
@@ -18,14 +24,7 @@ class VideoDataset(Dataset):
         else:
             summer = os.path.join(directory, "summer.webm")
             folders = [summer]
-        self.clip_len = clip_len
-
-        self.short_side = [128, 160]
-        self.crop_size = 112
-        self.frame_sample_rate = frame_sample_rate
-        self.mode = mode
-
-        self.fnames, labels = [], []
+        
         with open(csv_path, 'r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
