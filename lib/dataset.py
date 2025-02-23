@@ -8,11 +8,12 @@ from torch.utils.data import DataLoader, Dataset
 
 class VideoDataset(Dataset):
 
-    def __init__(self, directory, mode='train', clip_len=8, frame_sample_rate=1):
+    def __init__(self, directory, mode='train', clip_len=8, frame_sample_rate=1, dim=3):
         self.clip_len = clip_len
         self.short_side = [128, 160]
         self.crop_size = 112
         self.frame_sample_rate = frame_sample_rate
+        self.dim = dim # 2d gives single RGB frames, 3d gives videos
         self.mode = mode
         self.fnames, labels = [], []
         
@@ -35,16 +36,10 @@ class VideoDataset(Dataset):
                     labels.append(label)
 
     def __getitem__(self, index):
-        # loading and preprocessing. TODO move them to transform classes
         # notice loadvideo returns our buffer (i.e. 4d clip tensor)
         # it is taking a filename (i.e. fname) from our dataset
         # and loading it into a 4D pytorch tensor.
-        buffer = self.loadvideo(self.fnames[index])
-
-        # I think we're skipping clips that are too short
-        while buffer.shape[0]<self.clip_len+2 :
-            index = np.random.randint(self.__len__())
-            buffer = self.loadvideo(self.fnames[index])
+        buffer = self.loadvideo(self.fnames[index], dim=self.dim)
 
         if self.mode == 'train' or self.mode == 'training':
             # here's some data-aug
@@ -57,6 +52,10 @@ class VideoDataset(Dataset):
         buffer = self.crop(buffer, self.clip_len, self.crop_size)
         buffer = self.normalize(buffer)
         buffer = self.to_tensor(buffer)
+
+        if self.dim == 2:
+            # remove the time dim for a single frame input network
+            buffer = buffer.squeeze(1)
 
         # our input to the network and label
         # 2d resnet's input would be 3D.
@@ -72,7 +71,7 @@ class VideoDataset(Dataset):
         # keeping in mind that the first dim is the batch during training.
         return buffer.transpose((3, 0, 1, 2))
 
-    def loadvideo(self, fname):
+    def loadvideo(self, fname, dim=3):
         remainder = np.random.randint(self.frame_sample_rate)
         # initialize a VideoCapture object to read video data into a numpy array
         # cv2 is opencv2, a fast python library for doing image and video processing fxs
@@ -93,6 +92,9 @@ class VideoDataset(Dataset):
         start_idx = 0
         end_idx = frame_count - 1
         frame_count_sample = frame_count - 1
+        # this is how we convert our videos to single frames in 2D mode
+        if dim == 2:
+            frame_count_sample = 1
  
         # Z-dim (i.e. time), Y-dim, X-dim, RGB-dim
         buffer = np.empty((frame_count_sample, resize_height, resize_width, 3), np.dtype('float32'))
@@ -117,6 +119,8 @@ class VideoDataset(Dataset):
             if (frame_height != resize_height) or (frame_width != resize_width):
                 frame = cv2.resize(frame, (resize_width, resize_height))
             buffer[count] = frame
+            if dim == 2:
+                break # we've got our 1 frame, let's leave!
             count += 1
         capture.release() # we're done with the video object from opencv-2
         return buffer
