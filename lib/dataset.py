@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader, Dataset
 class VideoDataset(Dataset):
 
     def __init__(self, directory, mode='train', clip_len=8, frame_sample_rate=1):
+        # @TODO make train mode grab from 3 folders and test from the remaining (i.e. summer)
         folder = Path(directory)/mode  # get the directory of the specified split
         self.clip_len = clip_len
 
