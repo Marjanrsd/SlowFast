@@ -1,84 +1,161 @@
-# we need to make a bunch of X1 second videos @ X2 FPS 
-# ^ answers how many frames should our clips be?
-# each one's path and x-position on the track will need to go into data.csv
+import cv2
+import numpy as np
+import os
+import csv
 
-# we need to go through saving every frame as it's own filename
-# e.g. ./summer/0000003.avi # counter = 3
-# we will also need to filter out images that aren't "different enough"
-# cutoff_hyperpm = 100
-# diff_enuff == (abs(np.sum(last_frame_that_met_this_criteria) - np.sum(current_candidate_frame)) > cutoff_hyperpm)
-# if diff_enuff:
-#   capture.write(np_frame)
-#   counter = counter + 1
-# we need to keep a counter for how many avi clips we've added so far
-# we can do the differencing using just one clip (e.g. winter)
+# Parameters
+SHRINK_FACTOR = 50
+CLIP_DURATION = 24 * SHRINK_FACTOR          # seconds per clip (X1 seconds)
+FPS = 1                                     # frames per second (X2 FPS)
+FRAME_DIFF_CUTOFF = 1000                    # cutoff hyperparameter for frame difference
+SHORT_SIDE_RANGE = (500, 700)               # Example range for resizing the shorter side
 
-# a sample datapoint row in our data.csv file looks like:
-# (relative_path, 1-dim position label)
-# ("./winter/0000069.avi", 0.04)
-# ^ before processing the label would be some positive integer count
+# Input video files per season
+INPUT_VIDEOS = {
+    #"summer": "./summer.mp4",
+    "fall":   "./fall.mp4",
+    "spring": "./spring.webm",
+    "winter": "./winter.webm"
+}
 
-# the label will be inferred using how many
-# clips we end up adding to the dataset
-# so we can save each filename and video as 
-# we make it to save on RAM/memory usage. 
-# then at the end when we have the final 
-# clip count, we divide our list of time_steps
-# by our total number of clips to get our labels...
-# this would require keeping around the filenames
-# in a parallel list until the csv is made at the very end
+# Create output directories for each season
+for season in INPUT_VIDEOS.keys():
+    output_dir = f"./{season}"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+CSV_FILENAME = "data.csv"  # single CSV logging relative path and label (clip index)
 
-# we know whatever clip we make (e.g. summer), we get 3 more for free (same time points for fall, spring, winter)
-
-def load_video(self, fname):
-    remainder = np.random.randint(self.frame_sample_rate)
-    # initialize a VideoCapture object to read video data into a numpy array
-    # cv2 is opencv2, a fast python library for doing image and video processing fxs
-    capture = cv2.VideoCapture(fname)
-    # notice the capture has statistics about its video
-    frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))    #z
-    frame_width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))    #X
-    frame_height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))  #Y
-    
+def get_resize_dims(frame_width, frame_height):
+    # Determine new dimensions while keeping aspect ratio based on a random choice in SHORT_SIDE_RANGE.
     if frame_height < frame_width:
-        resize_height = np.random.randint(self.short_side[0], self.short_side[1] + 1)
+        resize_height = np.random.randint(SHORT_SIDE_RANGE[0], SHORT_SIDE_RANGE[1] + 1)
         resize_width = int(float(resize_height) / frame_height * frame_width)
     else:
-        resize_width = np.random.randint(self.short_side[0], self.short_side[1] + 1)
+        resize_width = np.random.randint(SHORT_SIDE_RANGE[0], SHORT_SIDE_RANGE[1] + 1)
         resize_height = int(float(resize_width) / frame_width * frame_height)
-    
-    # create a buffer. Must have dtype float, so it gets converted to a FloatTensor by Pytorch later
-    start_idx = 0
-    end_idx = frame_count - 1
-    frame_count_sample = frame_count - 1
-    
-    # Z-dim (i.e. time), Y-dim, X-dim, RGB-dim
-    buffer = np.empty((frame_count_sample, resize_height, resize_width, 3), np.dtype('float32'))
-    
-    count = 0
-    # doesn't have to be initialized technically
-    retaining = True
-    
-    # read in each frame, (potentially) one at a time into the numpy buffer array
-    while (count <= end_idx and retaining):
-        # this is how you get each from of a video using Open-CV2
-        retaining, frame = capture.read()
-        if count < start_idx:
-            count += 1
+    return resize_width, resize_height
+
+def save_clip(frames_dict, clip_index, fps=FPS):
+    # Save one clip per season, using the provided frames dictionary.
+    # The frames_dict should have season as key and list of frames as value.
+    for season, frames in frames_dict.items():
+        if not frames:
             continue
-        # the first var from read() is whether the video is empty/done
-        if retaining is False or count > end_idx:
-            break
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # will resize frames if not already final size
+        # Only save every SHRINK_FACTOR-th frame
+        sampled_frames = frames[::SHRINK_FACTOR]
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        height, width, _ = sampled_frames[0].shape
+        # Adjust fps according to SHRINK_FACTOR if needed
+        new_fps = max(1, fps // SHRINK_FACTOR)
+        filename = os.path.join(f"./{season}", f"{clip_index:07d}.avi")
+        out = cv2.VideoWriter(filename, fourcc, new_fps, (width, height))
+        for frame in sampled_frames:
+            out.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+        out.release()
+
+def process_videos(input_videos):
+    # Open VideoCapture for all videos (assumed aligned in time)
+    caps = {}
+    for season, path in input_videos.items():
+        cap = cv2.VideoCapture(path)
+        if not cap.isOpened():
+            print(f"Error: Unable to open video file for {season}: {path}")
+            return
+        caps[season] = cap
+
+    # Decide on a common resize dimension using the winter video (assumed all have same dimensions)
+    frame_width = int(caps["winter"].get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(caps["winter"].get(cv2.CAP_PROP_FRAME_HEIGHT))
+    resize_width, resize_height = get_resize_dims(frame_width, frame_height)
     
-        if (frame_height != resize_height) or (frame_width != resize_width):
-            frame = cv2.resize(frame, (resize_width, resize_height))
-        buffer[count] = frame
-        count += 1
-    capture.release() # we're done with the video object from opencv-2
-    return buffer
+    clip_frames = CLIP_DURATION * FPS  # Number of frames per clip (accepted frames)
+    accepted_clip_count = 0
+    # Store filenames and corresponding raw clip counts (for labels)
+    filenames = []
+    time_steps = []  # one entry per clip (index)
+    
+    # For each season, maintain a current clip buffer and last accepted frame (for frame differencing)
+    current_clips = {season: [] for season in input_videos.keys()}
+    last_accepted = {season: None for season in input_videos.keys()}
+    
+    frame_idx = 0
+    start_skip_amount = 6000  # skip over black or initial frames (if needed)
+    skips = 0
+
+    while True:
+        # Read one frame from each video
+        frames = {}
+        end_reached = False
+        for season, cap in caps.items():
+            ret, frame = cap.read()
+            if not ret:
+                end_reached = True
+                break
+            # For the first few frames, skip if needed
+            if skips < start_skip_amount:
+                frames[season] = None
+                continue
+            # Convert to RGB and resize
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            if (frame.shape[1] != resize_width) or (frame.shape[0] != resize_height):
+                frame = cv2.resize(frame, (resize_width, resize_height))
+            frames[season] = frame
+        if end_reached:
+            break
+        
+        if skips < start_skip_amount:
+            skips += 1
+            frame_idx += 1
+            continue
+        
+        # Process each season's frame for frame differencing
+        for season, frame in frames.items():
+            if frame is None:
+                continue
+            if len(current_clips[season]) == 0:
+                # Start a new clip: always accept the first frame.
+                current_clips[season].append(frame)
+                last_accepted[season] = frame
+            else:
+                diff = abs(np.sum(last_accepted[season].astype("float32")) - np.sum(frame.astype("float32")))
+                # Debug print can be uncommented if needed:
+                print(f"{season} Frame {frame_idx} diff: {diff}")
+                if diff > FRAME_DIFF_CUTOFF:
+                    current_clips[season].append(frame)
+                    last_accepted[season] = frame
+
+        # Check if any one season’s clip buffer reached the required length.
+        # (Since clips are in parallel, they should all roughly reach the threshold together.)
+        if all(len(clip) >= clip_frames for clip in current_clips.values()):
+            # Save out clips for all seasons with the same clip index.
+            save_clip(current_clips, accepted_clip_count, fps=FPS)
+            # Record filename of one season (say winter) as the reference; label applies equally.
+            filenames.append(os.path.join("winter", f"{accepted_clip_count:07d}.avi"))
+            time_steps.append(accepted_clip_count)
+            accepted_clip_count += 1
+            # Reset clip buffers and last accepted frames for all seasons
+            current_clips = {season: [] for season in input_videos.keys()}
+            last_accepted = {season: None for season in input_videos.keys()}
+        
+        frame_idx += 1
+
+    # Release all captures
+    for cap in caps.values():
+        cap.release()
+
+    # Normalize the time_steps to obtain labels between 0 and 1.
+    if accepted_clip_count > 1:
+        normalized_labels = [ts / (accepted_clip_count - 1) for ts in time_steps]
+    else:
+        normalized_labels = [0 for _ in time_steps]
+
+    # Write CSV file with (relative_path, normalized label)
+    with open(CSV_FILENAME, mode="w", newline="") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["relative_path", "label"])
+        for fn, label in zip(filenames, normalized_labels):
+            writer.writerow([fn, label])
+    print(f"Processed {accepted_clip_count} clips. CSV saved as {CSV_FILENAME}.")
 
 if __name__ == "__main__":
-  fname = "./summer.mp4"
-  load_video(fname)
+    process_videos(INPUT_VIDEOS)
