@@ -85,15 +85,21 @@ class VideoDataset(Dataset):
         # create a buffer. Must have dtype float, so it gets converted to a FloatTensor by Pytorch later
         start_idx = 0
         end_idx = frame_count-1
+        # self.frame_sample_rate == 1; Used for skipping frames, see next occurances.
         frame_count_sample = frame_count // self.frame_sample_rate - 1
+        # they limit the number of frames to a clip to 300 for some reason
+        # if it is longer we take a random, continuous sample of 300 frames
         if frame_count>300:
             end_idx = np.random.randint(300, frame_count)
             start_idx = end_idx - 300
             frame_count_sample = 301 // self.frame_sample_rate - 1
+        # Z-dim (i.e. time), Y-dim, X-dim, RGB-dim
         buffer = np.empty((frame_count_sample, resize_height, resize_width, 3), np.dtype('float32'))
 
         count = 0
+        # doesn't have to be initialized technically
         retaining = True
+        # the current number of frames loaded into the clip's buffer (i.e. 4D tensor)
         sample_count = 0
 
         # read in each frame, one at a time into the numpy buffer array
