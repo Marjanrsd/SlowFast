@@ -40,6 +40,7 @@ class VideoDataset(Dataset):
         # and loading it into a 4D pytorch tensor.
         buffer = self.loadvideo(self.fnames[index])
 
+        # I think we're skipping clips that are too short
         while buffer.shape[0]<self.clip_len+2 :
             index = np.random.randint(self.__len__())
             buffer = self.loadvideo(self.fnames[index])
