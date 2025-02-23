@@ -130,7 +130,7 @@ def process_videos(input_videos):
             # Save out clips for all seasons with the same clip index.
             save_clip(current_clips, accepted_clip_count, fps=FPS)
             # Record filename of one season (say winter) as the reference; label applies equally.
-            filenames.append(os.path.join("winter", f"{accepted_clip_count:07d}.avi"))
+            filenames.append(f"{accepted_clip_count:07d}.avi")
             time_steps.append(accepted_clip_count)
             accepted_clip_count += 1
             # Reset clip buffers and last accepted frames for all seasons
