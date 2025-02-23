@@ -15,6 +15,9 @@ class VideoDataset(Dataset):
             fall = os.path.join(directory, "fall.mp4")
             winter = os.path.join(directory, "winter.webm")
             folders = [spring, fall, winter]
+        else:
+            summer = os.path.join(directory, "summer.webm")
+            folders = [summer]
         self.clip_len = clip_len
 
         self.short_side = [128, 160]
