@@ -102,7 +102,7 @@ class VideoDataset(Dataset):
         # the current number of frames loaded into the clip's buffer (i.e. 4D tensor)
         sample_count = 0
 
-        # read in each frame, one at a time into the numpy buffer array
+        # read in each frame, (potentially) one at a time into the numpy buffer array
         while (count <= end_idx and retaining):
             # this is how you get each from of a video using Open-CV2
             retaining, frame = capture.read()
