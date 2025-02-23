@@ -12,7 +12,7 @@ SHORT_SIDE_RANGE = (500, 700)               # Example range for resizing the sho
 
 # Input video files per season
 INPUT_VIDEOS = {
-    "summer": "./summer.mp4",
+    "summer": "./summer.webm",
     "fall":   "./fall.mp4",
     "spring": "./spring.webm",
     "winter": "./winter.webm"
