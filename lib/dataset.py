@@ -8,8 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 
 class VideoDataset(Dataset):
 
-    def __init__(self, directory, mode='train', clip_len=8, frame_sample_rate=1, dim=3):
-        self.clip_len = clip_len
+    def __init__(self, directory, mode='train', frame_sample_rate=1, dim=3):
         self.short_side = [128, 160]
         self.crop_size = 112
         self.frame_sample_rate = frame_sample_rate
@@ -49,7 +48,7 @@ class VideoDataset(Dataset):
         # hence giving us some more data augmentation!
         # time is cropped down to the desired clip-length
         # before this cropping, the buffer could have 300 vid frames
-        buffer = self.crop(buffer, self.clip_len, self.crop_size)
+        buffer = self.crop(buffer, self.crop_size)
         buffer = self.normalize(buffer)
         buffer = self.to_tensor(buffer)
 
@@ -125,9 +124,7 @@ class VideoDataset(Dataset):
         capture.release() # we're done with the video object from opencv-2
         return buffer
     
-    def crop(self, buffer, clip_len, crop_size):
-        # randomly select time index for temporal jittering
-        time_index = np.random.randint(buffer.shape[0] - clip_len)
+    def crop(self, buffer, crop_size):
         # Randomly select start indices in order to crop the video
         height_index = np.random.randint(buffer.shape[1] - crop_size)
         width_index = np.random.randint(buffer.shape[2] - crop_size)
@@ -135,9 +132,8 @@ class VideoDataset(Dataset):
         # crop and jitter the video using indexing. The spatial crop is performed on 
         # the entire array, so each frame is cropped in the same location. The temporal
         # jitter takes place via the selection of consecutive frames
-        buffer = buffer[time_index:time_index + clip_len,
-                 height_index:height_index + crop_size,
-                 width_index:width_index + crop_size, :]
+        buffer = buffer[:, height_index:height_index + crop_size,
+                           width_index:width_index + crop_size, :]
 
         return buffer                
 
