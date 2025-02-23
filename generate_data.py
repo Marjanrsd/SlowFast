@@ -30,7 +30,7 @@
 
 # we know whatever clip we make (e.g. summer), we get 3 more for free (same time points for fall, spring, winter)
 
-def loadvideo(self, fname):
+def load_video(self, fname):
         remainder = np.random.randint(self.frame_sample_rate)
         # initialize a VideoCapture object to read video data into a numpy array
         # cv2 is opencv2, a fast python library for doing image and video processing fxs
