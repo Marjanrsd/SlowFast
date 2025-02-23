@@ -106,6 +106,7 @@ class VideoDataset(Dataset):
             # the first var from read() is whether it's the video is empty/done
             if retaining is False or count > end_idx:
                 break
+            # skip but every Nth frames and don't go over our limit of frames per clip(?)   
             if count % self.frame_sample_rate == remainder and sample_count < frame_count_sample:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 # will resize frames if not already final size
@@ -114,6 +115,7 @@ class VideoDataset(Dataset):
                     frame = cv2.resize(frame, (resize_width, resize_height))
                 buffer[sample_count] = frame
                 sample_count = sample_count + 1
+            # whether that last video frame was included or not, increase the vid frame counter
             count += 1
         capture.release() # we're done with the video object from opencv-2
         return buffer
