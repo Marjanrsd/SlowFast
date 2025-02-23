@@ -87,15 +87,16 @@ class SlowFast(nn.Module):
             block, 512, layers[3], stride=2, head_conv=3)
         self.dp = nn.Dropout(dropout)
         self.fc = nn.Linear(self.fast_inplanes+2048, class_num, bias=False)
+        self.sig = nn.Sigmoid()
+        
     def forward(self, input):
         fast, lateral = self.FastPath(input[:, :, ::2, :, :])
         slow = self.SlowPath(input[:, :, ::16, :, :], lateral)
         x = torch.cat([slow, fast], dim=1)
         x = self.dp(x)
         x = self.fc(x)
+        x = self.sig(x) # get our (x,y) inferences
         return x
-
-
 
     def SlowPath(self, input, lateral):
         x = self.slow_conv1(input)
@@ -179,8 +180,9 @@ class SlowFast(nn.Module):
         self.slow_inplanes = planes * block.expansion + planes * block.expansion//8*2
         return nn.Sequential(*layers)
 
-
-
+# would be better named resnet503d, because it is not resnet
+# It has a block structure like the normal
+# 2d resnet, but using 3D convolutions instead of 2d
 
 def resnet50(**kwargs):
     """Constructs a ResNet-50 model.
