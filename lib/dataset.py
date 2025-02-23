@@ -98,13 +98,15 @@ class VideoDataset(Dataset):
 
         # read in each frame, one at a time into the numpy buffer array
         while (count <= end_idx and retaining):
+            # this is how you get each from of a video using Open-CV2
             retaining, frame = capture.read()
             if count < start_idx:
                 count += 1
                 continue
-            if retaining is False or count>end_idx:
+            # the first var from read() is whether it's the video is empty/done
+            if retaining is False or count > end_idx:
                 break
-            if count%self.frame_sample_rate == remainder and sample_count < frame_count_sample:
+            if count % self.frame_sample_rate == remainder and sample_count < frame_count_sample:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 # will resize frames if not already final size
 
@@ -113,7 +115,7 @@ class VideoDataset(Dataset):
                 buffer[sample_count] = frame
                 sample_count = sample_count + 1
             count += 1
-        capture.release()
+        capture.release() # we're done with the video object from opencv-2
         return buffer
     
     def crop(self, buffer, clip_len, crop_size):
