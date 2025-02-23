@@ -80,5 +80,5 @@ def load_video(self, fname):
     return buffer
 
 if __name__ == "__main__":
-  fname = "./summer.webm"
+  fname = "./summer.mp4"
   load_video(fname)
