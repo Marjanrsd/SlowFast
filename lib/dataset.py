@@ -48,8 +48,9 @@ class VideoDataset(Dataset):
         if self.mode == 'train' or self.mode == 'training':
             # here's some data-aug
             buffer = self.randomflip(buffer)
-        # here's some more data-aug
         # self.crop will crop X,Y,& time
+        # where you begin cropping the subset is a random number,
+        # hence giving us some more data augmentation!
         # time is cropped down to the desired clip-length
         # before this cropping, the buffer could have 300 vid frames
         buffer = self.crop(buffer, self.clip_len, self.crop_size)
