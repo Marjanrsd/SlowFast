@@ -10,7 +10,11 @@ class VideoDataset(Dataset):
 
     def __init__(self, directory, mode='train', clip_len=8, frame_sample_rate=1):
         # @TODO make train mode grab from 3 folders and test from the remaining (i.e. summer)
-        folder = Path(directory)/mode  # get the directory of the specified split
+        if mode == 'train' or mode == 'training':
+            spring = os.path.join(directory, "spring.webm")
+            fall = os.path.join(directory, "fall.mp4")
+            winter = os.path.join(directory, "winter.webm")
+            folders = [spring, fall, winter]
         self.clip_len = clip_len
 
         self.short_side = [128, 160]
@@ -18,12 +22,16 @@ class VideoDataset(Dataset):
         self.frame_sample_rate = frame_sample_rate
         self.mode = mode
 
-
         self.fnames, labels = [], []
-        for label in sorted(os.listdir(folder)):
-            for fname in os.listdir(os.path.join(folder, label)):
-                self.fnames.append(os.path.join(folder, label, fname))
-                labels.append(label)
+        with open(csv_path, 'r', newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                rpath = row["relative_path"]
+                label = row["label"]
+                for folder in folders:
+                    self.fnames.append(os.path.join(folder, rpath))
+                    labels.append(label)
+                    
         # prepare a mapping between the label names (strings) and indices (ints)
         self.label2index = {label:index for index, label in enumerate(sorted(set(labels)))} 
         # convert the list of label names into an array of label indices
