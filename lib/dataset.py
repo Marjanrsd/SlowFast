@@ -63,6 +63,9 @@ class VideoDataset(Dataset):
     def to_tensor(self, buffer):
         # convert from [D, H, W, C] format to [C, D, H, W] (what PyTorch uses)
         # D = Depth (in this case, time), H = Height, W = Width, C = Channels
+        # Now it is RGB-dim first, time/Z, Y, and X as the last dimension.
+        # This is why we index the 2nd-dim (counting from 0), 
+        # keeping in mind that the first dim is the batch during training.
         return buffer.transpose((3, 0, 1, 2))
 
     def loadvideo(self, fname):
