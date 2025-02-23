@@ -46,6 +46,7 @@ class VideoDataset(Dataset):
             buffer = self.loadvideo(self.fnames[index])
 
         if self.mode == 'train' or self.mode == 'training':
+            # here's some data-aug
             buffer = self.randomflip(buffer)
         buffer = self.crop(buffer, self.clip_len, self.crop_size)
         buffer = self.normalize(buffer)
