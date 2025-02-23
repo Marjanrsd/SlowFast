@@ -34,16 +34,6 @@ class VideoDataset(Dataset):
                 for folder in folders:
                     self.fnames.append(os.path.join(folder, rpath))
                     labels.append(label)
-                    
-        # prepare a mapping between the label names (strings) and indices (ints)
-        self.label2index = {label:index for index, label in enumerate(sorted(set(labels)))} 
-        # convert the list of label names into an array of label indices
-        self.label_array = np.array([self.label2index[label] for label in labels], dtype=int)
-
-        label_file = str(len(os.listdir(folder)))+'class_labels.txt'
-        with open(label_file, 'w') as f:
-            for id, label in enumerate(sorted(self.label2index)):
-                f.writelines(str(id + 1) + ' ' + label + '\n')
 
     def __getitem__(self, index):
         # loading and preprocessing. TODO move them to transform classes
@@ -73,7 +63,7 @@ class VideoDataset(Dataset):
         # 2d resnet's input would be 3D.
         # 3d resnet's is a clip that is 4d.
         # buffer == clip == sequence of frames
-        return buffer, self.label_array[index]
+        return buffer, self.labels[index]
 
     def to_tensor(self, buffer):
         # convert from [D, H, W, C] format to [C, D, H, W] (what PyTorch uses)
