@@ -155,9 +155,11 @@ def visualize_model(model, num_images=16):
 # get the model definition and weights for a resnet18
 # pre-trained on the full imagenet (classes=1,000!) dataset
 model_conv = torchvision.models.resnet18(weights='IMAGENET1K_V1')
+# print(model_conv) will let you see the layers of the network
 num_ftrs = model_conv.fc.in_features
+# chopped off the head and replaced with our 2 output neurons
 model_conv.fc = nn.Sequential(
-     nn.Linear(num_ftrs, 2), 
+     nn.Linear(num_ftrs, 2),
      nn.Sigmoid(),
 )
 
