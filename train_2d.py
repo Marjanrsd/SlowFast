@@ -14,7 +14,7 @@ from torchvision import transforms as T
 from torchvision import datasets, models
 from matplotlib.gridspec import GridSpec
 
-cudnn.benchmark = True
+cudnn.benchmark = False
 
 train_trans = T.Compose([
     T.Resize(224, antialias=True),
