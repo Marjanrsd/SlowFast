@@ -28,7 +28,7 @@ image_datasets = {}
 image_datasets['train'] = VideoDataset('./', mode='train', dim=2)
 image_datasets['val'] = VideoDataset('./', mode='test', dim=2)
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=128, shuffle=True, 
-                                              num_workers=4, pin_memory=True)
+                                              num_workers=8, pin_memory=True)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 
@@ -40,10 +40,10 @@ def imshow(inp, title=None):
     # @TODO might be wrong values...
     inp = inp.numpy().transpose((1, 2, 0))
     # @TODO might be wrong values...
-    mean = np.array([0.485, 0.456, 0.406])
+    #mean = np.array([0.485, 0.456, 0.406])
     # @TODO might be wrong values...
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
+    #std = np.array([0.229, 0.224, 0.225])
+    #inp = std * inp + mean
     inp = np.clip(inp, 0, 1)
     plt.imshow(inp)
     if title is not None:
