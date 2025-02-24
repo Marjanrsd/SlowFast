@@ -106,9 +106,6 @@ class VideoDataset(Dataset):
         while (count <= end_idx and retaining):
             # this is how you get each from of a video using Open-CV2
             retaining, frame = capture.read()
-            if count < start_idx:
-                count += 1
-                continue
             # the first var from read() is whether the video is empty/done
             if retaining is False or count > end_idx:
                 break
