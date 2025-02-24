@@ -114,6 +114,7 @@ class VideoDataset(Dataset):
 
             if (frame_height != resize_height) or (frame_width != resize_width):
                 frame = cv2.resize(frame, (resize_width, resize_height))
+            print(f"count: {count}")
             buffer[count] = frame
             if self.dim == 2:
                 break # we've got our 1 frame, let's leave!
