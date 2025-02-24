@@ -126,7 +126,7 @@ def visualize_model(model, num_images=16):
     with torch.no_grad():
         for i, (inputs, x) in enumerate(dataloaders['val']):
             inputs = inputs.to(device)
-            x = x.to(device)
+            labels = x.to(device)
             outputs = model(inputs)
         
             for j in range(inputs.size()[0]):
