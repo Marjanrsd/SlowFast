@@ -74,12 +74,10 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=1):
             running_loss = 0.0
 
             # Iterate over data.
-            for inputs, x, y in dataloaders[phase]:
+            for inputs, x in dataloaders[phase]:
                 inputs = inputs.to(device)
                 x = x.to(device)
-                y = y.to(device)
-                labels = torch.stack([x, y], dim=1)
-                labels = torch.squeeze(labels, -1)
+                #labels = torch.squeeze(labels, -1)
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
@@ -124,23 +122,18 @@ def visualize_model(model, num_images=16):
     fig = plt.figure()
 
     with torch.no_grad():
-        for i, (inputs, x, y) in enumerate(dataloaders['val']):
+        for i, (inputs, x) in enumerate(dataloaders['val']):
             inputs = inputs.to(device)
             x = x.to(device)
-            y = y.to(device)
-            labels = torch.stack([x, y])
-            labels = torch.squeeze(labels, -1)
-            labels = torch.transpose(labels, 0, 1)
-         
             outputs = model(inputs)
         
             for j in range(inputs.size()[0]):
                 images_so_far += 1
                 ax = plt.subplot(num_images//4, 4, images_so_far)
                 ax.axis('off')
-                o_x, o_y = outputs[j].cpu().tolist()
-                gt_x, gt_y = labels[j].cpu().tolist()
-                title = f'Predicted: ({o_x:.3f},{o_y:.3f}) \nGT: ({gt_x:.3f},{gt_y:.3f})'
+                o_x = outputs[j].cpu().tolist()
+                gt_x = labels[j].cpu().tolist()
+                title = f'Predicted: ({o_x:.3f}) \nGT: ({gt_x:.3f})'
                 ax.set_title(title, fontsize=8)
                 imshow(inputs.cpu().data[j])
         
@@ -156,9 +149,9 @@ if __name__ == "__main__":
     model_conv = torchvision.models.resnet18(weights='IMAGENET1K_V1')
     # print(model_conv) will let you see the layers of the network
     num_ftrs = model_conv.fc.in_features
-    # chopped off the head and replaced with our 2 output neurons
+    # chopped off the head and replaced with our 1 output neuron
     model_conv.fc = nn.Sequential(
-         nn.Linear(num_ftrs, 2),
+         nn.Linear(num_ftrs, 1),
          nn.Sigmoid(),
     )
     
