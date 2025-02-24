@@ -1,4 +1,4 @@
-import os
+eimport os
 import time
 import torch
 import torchvision
@@ -25,8 +25,8 @@ train_trans = T.Compose([
 
 image_datasets = {}
 # directory, mode='train', frame_sample_rate=1, dim=3
-image_datasets['train'] = VideoDataset('./', mode='train', dim=3, transform=None, shuffle=True)
-image_datasets['val'] = VideoDataset('./', mode='test', transform=None, shuffle=False)
+image_datasets['train'] = VideoDataset('./', mode='train', dim=3, shuffle=True)
+image_datasets['val'] = VideoDataset('./', mode='test', shuffle=False)
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=256, shuffle=True, 
                                               num_workers=4, pin_memory=True)
               for x in ['train', 'val']}
