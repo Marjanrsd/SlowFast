@@ -69,6 +69,7 @@ class VideoDataset(Dataset):
         return buffer.transpose((3, 0, 1, 2))
 
     def loadvideo(self, fname, dim=None):
+        print(f"fname: {fname}")
         if dim == None:
             dim = self.dim
         remainder = np.random.randint(self.frame_sample_rate)
