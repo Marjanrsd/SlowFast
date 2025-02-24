@@ -2,6 +2,7 @@ import os
 import csv
 import cv2
 import numpy as np
+import torch
 from torch.utils.data import DataLoader, Dataset
 
 class VideoDataset(Dataset):
