@@ -9,7 +9,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.optim import lr_scheduler
 import torch.backends.cudnn as cudnn
-from dataloader import LocalizeDataset
+from lib.dataset import VideoDataset
 from torchvision import transforms as T
 from torchvision import datasets, models
 from matplotlib.gridspec import GridSpec
