@@ -51,7 +51,7 @@ def imshow(inp, title=None):
     plt.pause(0.001)  # pause a bit for the plots
 
 # Get a batch of training data
-inputs, _x, _y = next(iter(dataloaders['train']))
+inputs, _x = next(iter(dataloaders['train']))
 inputs = inputs[:8,...]
 out = torchvision.utils.make_grid(inputs)
 imshow(out, title="Verify the images loaded correctly!")
