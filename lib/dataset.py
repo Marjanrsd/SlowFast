@@ -25,7 +25,7 @@ class VideoDataset(Dataset):
             summer = os.path.join(directory, "summer.webm")
             folders = [summer]
         
-        with open(csv_path, 'r', newline='') as csvfile:
+        with open('data.csv', 'r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 rpath = row["relative_path"]
