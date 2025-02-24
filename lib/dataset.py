@@ -15,12 +15,12 @@ class VideoDataset(Dataset):
         self.fnames, labels = [], []
         
         if mode == 'train' or mode == 'training':
-            spring = os.path.join(directory, "spring.webm")
-            fall = os.path.join(directory, "fall.mp4")
-            winter = os.path.join(directory, "winter.webm")
+            spring = os.path.join(directory, "spring")
+            fall = os.path.join(directory, "fall")
+            winter = os.path.join(directory, "winter")
             folders = [spring, fall, winter]
         else:
-            summer = os.path.join(directory, "summer.webm")
+            summer = os.path.join(directory, "summer")
             folders = [summer]
         
         with open('data.csv', 'r', newline='') as csvfile:
