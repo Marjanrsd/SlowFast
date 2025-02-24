@@ -69,7 +69,6 @@ class VideoDataset(Dataset):
         return buffer.transpose((3, 0, 1, 2))
 
     def loadvideo(self, fname, dim=None):
-        print(f"fname: {fname}")
         if dim == None:
             dim = self.dim
         remainder = np.random.randint(self.frame_sample_rate)
@@ -159,9 +158,4 @@ class VideoDataset(Dataset):
 
 
 if __name__ == '__main__':
-
-    datapath = r'D:\SlowFastNN\UCF-101\archive'
-    train_dataloader = \
-        DataLoader( VideoDataset(datapath, mode='train'), batch_size=10, shuffle=True, num_workers=0)
-    for step, (buffer, label) in enumerate(train_dataloader):
-        print("label: ", label)
+    print("Hi :)")
