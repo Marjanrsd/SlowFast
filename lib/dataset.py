@@ -8,8 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 
 class VideoDataset(Dataset):
 
-    def __init__(self, directory, mode='train', frame_sample_rate=1, dim=3, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, directory, mode='train', frame_sample_rate=1, dim=3):
         self.short_side = [128, 160]
         self.crop_size = 112
         self.frame_sample_rate = frame_sample_rate
