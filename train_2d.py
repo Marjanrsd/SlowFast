@@ -133,8 +133,8 @@ def visualize_model(model, num_images=16):
                 images_so_far += 1
                 ax = plt.subplot(num_images//4, 4, images_so_far)
                 ax.axis('off')
-                o_x = outputs[j].cpu().tolist()
-                gt_x = labels[j].cpu().tolist()
+                o_x = float(outputs[j].cpu())
+                gt_x = float(labels[j].cpu())
                 title = f'Predicted: ({o_x:.3f}) \nGT: ({gt_x:.3f})'
                 ax.set_title(title, fontsize=8)
                 imshow(inputs.cpu().data[j])
