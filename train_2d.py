@@ -24,10 +24,9 @@ train_trans = T.Compose([
 '''
 
 image_datasets = {}
-image_datasets['train'] = LocalizeDataset('./data/history_ch', train=True, transform=None, 
-                                          shuffle=True, split=0.85)
-image_datasets['val'] = LocalizeDataset('./data/history_ch', train=False, transform=None,
-                                        shuffle=True, split=0.85)
+# directory, mode='train', frame_sample_rate=1, dim=3
+image_datasets['train'] = VideoDataset('./', mode='train', dim=3, transform=None, shuffle=True)
+image_datasets['val'] = VideoDataset('./', mode='test', transform=None, shuffle=False)
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=256, shuffle=True, 
                                               num_workers=4, pin_memory=True)
               for x in ['train', 'val']}
@@ -38,8 +37,11 @@ device = torch.device("cuda:0")
 
 def imshow(inp, title=None):
     """Display image for Tensor."""
+    # @TODO might be wrong values...
     inp = inp.numpy().transpose((1, 2, 0))
+    # @TODO might be wrong values...
     mean = np.array([0.485, 0.456, 0.406])
+    # @TODO might be wrong values...
     std = np.array([0.229, 0.224, 0.225])
     inp = std * inp + mean
     inp = np.clip(inp, 0, 1)
