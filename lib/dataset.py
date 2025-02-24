@@ -70,7 +70,9 @@ class VideoDataset(Dataset):
         # keeping in mind that the first dim is the batch during training.
         return buffer.transpose((3, 0, 1, 2))
 
-    def loadvideo(self, fname, dim=self.dim):
+    def loadvideo(self, fname, dim=None):
+        if dim == None:
+            dim = self.dim
         remainder = np.random.randint(self.frame_sample_rate)
         # initialize a VideoCapture object to read video data into a numpy array
         # cv2 is opencv2, a fast python library for doing image and video processing fxs
