@@ -152,6 +152,8 @@ def visualize_model(model, num_images=16):
                 
         model.train(mode=was_training)
 
+# get the model definition and weights for a resnet18
+# pre-trained on the full imagenet (classes=1,000!) dataset
 model_conv = torchvision.models.resnet18(weights='IMAGENET1K_V1')
 num_ftrs = model_conv.fc.in_features
 model_conv.fc = nn.Sequential(
