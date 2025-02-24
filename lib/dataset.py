@@ -12,7 +12,7 @@ class VideoDataset(Dataset):
         self.frame_sample_rate = frame_sample_rate
         self.dim = dim # 2d gives single RGB frames, 3d gives videos
         self.mode = mode
-        self.fnames, labels = [], []
+        self.fnames, self.labels = [], []
         
         if mode == 'train' or mode == 'training':
             spring = os.path.join(directory, "spring")
@@ -30,7 +30,7 @@ class VideoDataset(Dataset):
                 label = row["label"]
                 for folder in folders:
                     self.fnames.append(os.path.join(folder, rpath))
-                    labels.append(label)
+                    self.labels.append(label)
 
     def __getitem__(self, index):
         # notice loadvideo returns our buffer (i.e. 4d clip tensor)
