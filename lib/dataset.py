@@ -92,7 +92,7 @@ class VideoDataset(Dataset):
         end_idx = frame_count - 1
         frame_count_sample = frame_count - 1
         # this is how we convert our videos to single frames in 2D mode
-        if dim == 2:
+        if self.dim == 2:
             frame_count_sample = 1
  
         # Z-dim (i.e. time), Y-dim, X-dim, RGB-dim
@@ -118,7 +118,7 @@ class VideoDataset(Dataset):
             if (frame_height != resize_height) or (frame_width != resize_width):
                 frame = cv2.resize(frame, (resize_width, resize_height))
             buffer[count] = frame
-            if dim == 2:
+            if self.dim == 2:
                 break # we've got our 1 frame, let's leave!
             count += 1
         capture.release() # we're done with the video object from opencv-2
