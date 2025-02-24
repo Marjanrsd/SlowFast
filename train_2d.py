@@ -87,7 +87,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=1):
                 # forward
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
-                    loss = criterion(outputs, labels)
+                    loss = criterion(outputs.squeeze(1), labels)
                     # backward
                     if phase == 'train':
                         loss.backward()
