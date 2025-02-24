@@ -119,56 +119,6 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=1):
     model.load_state_dict(torch.load(best_model_params_path))
     return model
 
-def make_movie(model):
-    map_img = plt.imread('./data/2nd_blueprint.png')
-    fig = plt.figure()
-    img_id = 0
-    model.eval()
-
-    with torch.no_grad():
-        for i, (inputs, x, y) in enumerate(dataloaders['train']):
-            inputs = inputs.to(device)
-            x = x.to(device)
-            y = y.to(device)
-            labels = torch.stack([x, y])
-            labels = torch.squeeze(labels, -1)
-            labels = torch.transpose(labels, 0, 1)
-            outputs = model(inputs)
-            for j in range(inputs.size()[0]):
-                gs = GridSpec(1,9) # 1 rows, 9 columns
-                ax = fig.add_subplot(gs[0,:2])
-                ax.axis('off')
-                o_x, o_y = outputs[j].cpu().tolist()
-                gt_x, gt_y = labels[j].cpu().tolist()
-                ax.set_title("First Person View", fontsize=8)
-                imshow(inputs.cpu().data[j])
-    
-                ax = fig.add_subplot(gs[0,2:])
-                ax.axis('off')
-                o_x, o_y = outputs[j].cpu().tolist()
-                gt_x, gt_y = labels[j].cpu().tolist()
-                ax.imshow(map_img, 
-                           resample=False, 
-                           interpolation='none', 
-                           cmap='gray', 
-                           vmin=0, 
-                           vmax=255)
-    
-                # denormalize (i.e. convert back to px space)
-                o_x = o_x * map_img.shape[1]
-                o_y = o_y * map_img.shape[0]
-                gt_x = gt_x * map_img.shape[1]
-                gt_y = gt_y * map_img.shape[0]
-                plt.scatter(x=o_x, y=o_y, c=[[1.,0.,0.,1.]], s=11, label="Prediction")
-                plt.scatter(x=gt_x, y=gt_y, c=[[0.,1.,0.,1.]], s=11, label="Ground Truth")
-                plt.legend(loc="lower right", fontsize=6, frameon=False, bbox_to_anchor=(1.0, -0.05), labelspacing=0.25)
-                fig.savefig(f'/tmp/{img_id:05d}.png', dpi=1200, bbox_inches='tight') # format='svg'
-                img_id += 1
-                print(f"movie frame #{img_id} done")
-                plt.pause(0.001)
-                plt.clf()
-
-
 def visualize_model(model, num_images=16):
     was_training = model.training
     model.eval()
@@ -224,5 +174,5 @@ model_conv = train_model(model_conv, criterion, optimizer_conv,
                          lr_schedule, num_epochs=250)
 
 visualize_model(model_conv)
-#make_movie(model_conv)
+#make_movie(model_conv) # see original code...
 plt.show()
