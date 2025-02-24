@@ -152,25 +152,26 @@ def visualize_model(model, num_images=16):
                 
         model.train(mode=was_training)
 
-# get the model definition and weights for a resnet18
-# pre-trained on the full imagenet (classes=1,000!) dataset
-model_conv = torchvision.models.resnet18(weights='IMAGENET1K_V1')
-# print(model_conv) will let you see the layers of the network
-num_ftrs = model_conv.fc.in_features
-# chopped off the head and replaced with our 2 output neurons
-model_conv.fc = nn.Sequential(
-     nn.Linear(num_ftrs, 2),
-     nn.Sigmoid(),
-)
-
-model_conv = model_conv.to(device)
-
-criterion = nn.MSELoss()
-optimizer_conv = optim.SGD(model_conv.parameters(), lr=0.01, momentum=0.9)
-lr_schedule = lr_scheduler.StepLR(optimizer_conv, step_size=50, gamma=0.1)
-model_conv = train_model(model_conv, criterion, optimizer_conv,
-                         lr_schedule, num_epochs=250)
-
-visualize_model(model_conv)
-#make_movie(model_conv) # see original code...
-plt.show()
+if __name__ == "__main__":
+    # get the model definition and weights for a resnet18
+    # pre-trained on the full imagenet (classes=1,000!) dataset
+    model_conv = torchvision.models.resnet18(weights='IMAGENET1K_V1')
+    # print(model_conv) will let you see the layers of the network
+    num_ftrs = model_conv.fc.in_features
+    # chopped off the head and replaced with our 2 output neurons
+    model_conv.fc = nn.Sequential(
+         nn.Linear(num_ftrs, 2),
+         nn.Sigmoid(),
+    )
+    
+    model_conv = model_conv.to(device)
+    
+    criterion = nn.MSELoss()
+    optimizer_conv = optim.SGD(model_conv.parameters(), lr=0.01, momentum=0.9)
+    lr_schedule = lr_scheduler.StepLR(optimizer_conv, step_size=50, gamma=0.1)
+    model_conv = train_model(model_conv, criterion, optimizer_conv,
+                             lr_schedule, num_epochs=250)
+    
+    visualize_model(model_conv)
+    #make_movie(model_conv) # see original code...
+    plt.show()
