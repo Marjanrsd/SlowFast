@@ -58,7 +58,8 @@ class VideoDataset(Dataset):
         # 2d resnet's input would be 3D.
         # 3d resnet's is a clip that is 4d.
         # buffer == clip == sequence of frames
-        return buffer, self.labels[index]
+        label = torch.tensor(self.labels[index])
+        return buffer, label
 
     def to_tensor(self, buffer):
         # convert from [D, H, W, C] format to [C, D, H, W] (what PyTorch uses)
