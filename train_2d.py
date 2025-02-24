@@ -10,18 +10,9 @@ import matplotlib.pyplot as plt
 from torch.optim import lr_scheduler
 import torch.backends.cudnn as cudnn
 from lib.dataset import VideoDataset
-from torchvision import transforms as T
 from torchvision import datasets, models
-from matplotlib.gridspec import GridSpec
 
 cudnn.benchmark = False
-
-'''
-train_trans = T.Compose([
-    T.Resize(224, antialias=True),
-    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
-'''
 
 image_datasets = {}
 # directory, mode='train', frame_sample_rate=1, dim=3
@@ -37,15 +28,23 @@ device = torch.device("cuda:0")
 
 def imshow(inp, title=None):
     """Display image for Tensor."""
-    # @TODO might be wrong values...
+    # (C,H,W) -> (H,W,C) *not sure about order of H & W
     inp = inp.numpy().transpose((1, 2, 0))
-    # @TODO might be wrong values...
-    #mean = np.array([0.485, 0.456, 0.406])
-    # @TODO might be wrong values...
-    #std = np.array([0.229, 0.224, 0.225])
-    #inp = std * inp + mean
+    mean = np.array([128, 128, 128])
+    std = np.array([128, 128, 128])
+    # this undoes the normalization in dataset.py
+    # making the image look as we typically expect
+    inp = std * inp + mean
+    # assumes 8-bit encoding
+    # which allows pixel values of 0-255
+    # plt expects everything between 0 & 1 though
+    inp = inp / 255
     inp = np.clip(inp, 0, 1)
-    plt.imshow(inp)
+    # since the final dimension is the RGB, this reverses the order
+    # most software libraries use one of the other, so try this 
+    # trick if you're images contain the right shape and brightness
+    # but the colors seem weird / inverted. 
+    plt.imshow(inp[...,::-1])
     if title is not None:
         plt.title(title)
     plt.pause(0.001)  # pause a bit for the plots
@@ -124,7 +123,7 @@ def visualize_model(model, num_images=16):
     fig = plt.figure()
 
     with torch.no_grad():
-        for i, (inputs, x) in enumerate(dataloaders['val']):
+        for inputs, x in dataloaders['val']:
             inputs = inputs.to(device)
             labels = x.to(device)
             outputs = model(inputs)
@@ -165,6 +164,7 @@ if __name__ == "__main__":
     model_conv = train_model(model_conv, criterion, optimizer_conv,
                              lr_schedule, num_epochs=250)
     
+    # model_conv.load_state_dict(torch.load("./best_model_params.pt"))
     visualize_model(model_conv)
     #make_movie(model_conv) # see original code...
     plt.show()
