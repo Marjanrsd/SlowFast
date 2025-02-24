@@ -28,7 +28,7 @@ class VideoDataset(Dataset):
             reader = csv.DictReader(csvfile)
             for row in reader:
                 rpath = row["relative_path"]
-                label = row["label"]
+                label = float(row["label"])
                 for folder in folders:
                     self.fnames.append(os.path.join(folder, rpath))
                     self.labels.append(label)
@@ -60,7 +60,7 @@ class VideoDataset(Dataset):
         # 3d resnet's is a clip that is 4d.
         # buffer == clip == sequence of frames
         label = torch.tensor(self.labels[index])
-        return buffer, float(label)
+        return buffer, label
 
     def to_tensor(self, buffer):
         # convert from [D, H, W, C] format to [C, D, H, W] (what PyTorch uses)
