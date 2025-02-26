@@ -75,7 +75,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=1): # schedul
             running_loss = 0.0 # accumiliated loss
 
             # Iterate over data.
-            for inputs, x in dataloaders[phase]:
+            for inputs, x in dataloaders[phase]: # in each batch
                 inputs = inputs.to(device)
                 labels = x.to(device)
                 #labels = torch.squeeze(labels, -1)
@@ -95,7 +95,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=1): # schedul
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
             if phase == 'train' and scheduler != None:
-                scheduler.step()
+                scheduler.step() # dynamically decrease the learning rate
 
             epoch_loss = running_loss / dataset_sizes[phase]
 
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     # pre-trained on the full imagenet (classes=1,000!) dataset
     model_conv = torchvision.models.resnet18(weights='IMAGENET1K_V1')
     # print(model_conv) will let you see the layers of the network
-    num_ftrs = model_conv.fc.in_features
+    num_ftrs = model_conv.fc.in_features # last layer of resenet is fc. we need to know the num input to that layer. The num output is the same
     # chopped off the head and replaced with our 1 output neuron
     model_conv.fc = nn.Sequential(
          nn.Linear(num_ftrs, 1),
