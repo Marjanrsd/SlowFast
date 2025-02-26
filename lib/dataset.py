@@ -105,8 +105,9 @@ class VideoDataset(Dataset):
         retaining = True
 
         # read in each frame, (potentially) one at a time into the numpy buffer array
-        while (count <= end_idx and retaining):
+        while (count < end_idx and retaining):
             # this is how you get each from of a video using Open-CV2
+            # if clip is not done: retaining
             retaining, frame = capture.read()
             # the first var from read() is whether the video is empty/done
             if retaining is False or count > end_idx:
