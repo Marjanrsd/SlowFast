@@ -44,7 +44,7 @@ def imshow(inp, title=None):
     # most software libraries use one of the other, so try this 
     # trick if you're images contain the right shape and brightness
     # but the colors seem weird / inverted. 
-    plt.imshow(inp[...,::-1])
+    plt.imshow(inp[...,::-1]) # changes from the red green blue to blue green red
     if title is not None:
         plt.title(title)
     plt.pause(0.001)  # pause a bit for the plots
