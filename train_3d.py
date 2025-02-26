@@ -21,8 +21,8 @@ if __name__ == "__main__":
     # directory, mode='train', frame_sample_rate=1, dim=3
     image_datasets['train'] = VideoDataset('./', mode='train', dim=3)
     image_datasets['val'] = VideoDataset('./', mode='test', dim=3)
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=10, shuffle=True, 
-                                                  num_workers=8, pin_memory=True)
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=24, shuffle=True, 
+                                                  num_workers=1, pin_memory=True)
                   for x in ['train', 'val']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
     
@@ -54,7 +54,8 @@ if __name__ == "__main__":
     
     # Get a batch of training data
     inputs, _x = next(iter(dataloaders['train']))
-    inputs = inputs[:8,...]
+    # grab first frame of first 8 videos of the batch
+    inputs = inputs[:8,:,0,...]
     out = torchvision.utils.make_grid(inputs)
     imshow(out, title="Verify the images loaded correctly!")
     plt.show() 
@@ -81,7 +82,6 @@ if __name__ == "__main__":
                 for inputs, x in dataloaders[phase]: # in each batch
                     inputs = inputs.to(device)
                     labels = x.to(device)
-                    #labels = torch.squeeze(labels, -1)
     
                     # zero the parameter gradients
                     optimizer.zero_grad()
@@ -89,7 +89,7 @@ if __name__ == "__main__":
                     # forward
                     with torch.set_grad_enabled(phase == 'train'):
                         outputs = model(inputs)
-                        outputs = torch.Sigmoid(outputs)
+                        outputs = torch.sigmoid(outputs)
                         loss = criterion(outputs.squeeze(1), labels)
                         # backward
                         if phase == 'train':
@@ -131,6 +131,7 @@ if __name__ == "__main__":
                 inputs = inputs.to(device)
                 labels = x.to(device)
                 outputs = model(inputs)
+                outputs = torch.sigmoid(outputs)
             
                 for j in range(inputs.size()[0]):
                     images_so_far += 1
@@ -140,7 +141,7 @@ if __name__ == "__main__":
                     gt_x = float(labels[j].cpu())
                     title = f'Predicted: ({o_x:.3f}) \nGT: ({gt_x:.3f})'
                     ax.set_title(title, fontsize=8)
-                    imshow(inputs.cpu().data[j])
+                    imshow(inputs[:,:,0,...].cpu().data[j])
             
                     if images_so_far == num_images:
                         model.train(mode=was_training)
@@ -159,7 +160,7 @@ if __name__ == "__main__":
     optimizer_conv = optim.Adam(model_conv.parameters(), lr=1e-3)
     lr_schedule = None # lr_scheduler.StepLR(optimizer_conv, step_size=50, gamma=0.1)
     model_conv = train_model(model_conv, criterion, optimizer_conv,
-                             lr_schedule, num_epochs=1)
+                             lr_schedule, num_epochs=120)
     
     # model_conv.load_state_dict(torch.load("./best_model_params.pt"))
     visualize_model(model_conv)
