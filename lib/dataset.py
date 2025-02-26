@@ -37,8 +37,17 @@ class VideoDataset(Dataset):
         # notice loadvideo returns our buffer (i.e. 4d clip tensor)
         # it is taking a filename (i.e. fname) from our dataset
         # and loading it into a 4D pytorch tensor.
-        buffer = self.loadvideo(self.fnames[index])
-
+        
+        # @TODO remove!! Hack for different len vids
+        while True:
+            try:
+                buffer = self.loadvideo(self.fnames[index])
+                if buffer.shape[0] != 24: 
+                    raise Exception(":c")
+                break
+            except:
+                index = index + 1
+        
         if self.mode == 'train' or self.mode == 'training':
             # here's some data-aug
             buffer = self.randomflip(buffer)
@@ -107,7 +116,6 @@ class VideoDataset(Dataset):
         # read in each frame, (potentially) one at a time into the numpy buffer array
         while (count < end_idx and retaining):
             # this is how you get each from of a video using Open-CV2
-            # if clip is not done: retaining
             retaining, frame = capture.read()
             # the first var from read() is whether the video is empty/done
             if retaining is False or count > end_idx:

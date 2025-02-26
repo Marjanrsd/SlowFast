@@ -86,16 +86,14 @@ class SlowFast(nn.Module):
         self.slow_res5 = self._make_layer_slow(
             block, 512, layers[3], stride=2, head_conv=3)
         self.dp = nn.Dropout(dropout)
-        self.fc = nn.Linear(self.fast_inplanes+2048, class_num, bias=False)
-        self.sig = nn.Sigmoid()
+        self.fc = nn.Linear(self.fast_inplanes, class_num, bias=False)
         
     def forward(self, input):
-        fast, lateral = self.FastPath(input[:, :, ::2, :, :])
-        slow = self.SlowPath(input[:, :, ::16, :, :], lateral)
-        x = torch.cat([slow, fast], dim=1)
-        x = self.dp(x)
+        fast, lateral = self.FastPath(input[:, :, ::1, :, :])
+        #slow = self.SlowPath(input[:, :, ::4, :, :], lateral)
+        #x = torch.cat([slow, fast], dim=1)
+        x = self.dp(fast)
         x = self.fc(x)
-        x = self.sig(x) # get our (x,y) inferences
         return x
 
     def SlowPath(self, input, lateral):
@@ -121,20 +119,20 @@ class SlowFast(nn.Module):
         x = self.fast_bn1(x)
         x = self.fast_relu(x)
         pool1 = self.fast_maxpool(x)
-        lateral_p = self.lateral_p1(pool1)
-        lateral.append(lateral_p)
+        #lateral_p = self.lateral_p1(pool1)
+        #lateral.append(lateral_p)
 
         res2 = self.fast_res2(pool1)
-        lateral_res2 = self.lateral_res2(res2)
-        lateral.append(lateral_res2)
+        #lateral_res2 = self.lateral_res2(res2)
+        #lateral.append(lateral_res2)
         
         res3 = self.fast_res3(res2)
-        lateral_res3 = self.lateral_res3(res3)
-        lateral.append(lateral_res3)
+        #lateral_res3 = self.lateral_res3(res3)
+        #lateral.append(lateral_res3)
 
         res4 = self.fast_res4(res3)
-        lateral_res4 = self.lateral_res4(res4)
-        lateral.append(lateral_res4)
+        #lateral_res4 = self.lateral_res4(res4)
+        #lateral.append(lateral_res4)
 
         res5 = self.fast_res5(res4)
         x = nn.AdaptiveAvgPool3d(1)(res5)
