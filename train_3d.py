@@ -22,7 +22,7 @@ if __name__ == "__main__":
     image_datasets['train'] = VideoDataset('./', mode='train', dim=3)
     image_datasets['val'] = VideoDataset('./', mode='test', dim=3)
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=24, shuffle=True, 
-                                                  num_workers=1, pin_memory=True)
+                                                  num_workers=4, pin_memory=True)
                   for x in ['train', 'val']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
     
@@ -154,6 +154,7 @@ if __name__ == "__main__":
     # pre-trained on the full imagenet (classes=1,000!) dataset
     model_conv = slowfastnet.resnet50(class_num = 1)
     model_conv = model_conv.to(device)
+    #model_conv.load_state_dict(torch.load("./best_model_params.pt"))
     
     criterion = nn.MSELoss()
     # optimizer_conv = optim.SGD(model_conv.parameters(), lr=0.01, momentum=0.9)
@@ -162,7 +163,7 @@ if __name__ == "__main__":
     model_conv = train_model(model_conv, criterion, optimizer_conv,
                              lr_schedule, num_epochs=120)
     
-    # model_conv.load_state_dict(torch.load("./best_model_params.pt"))
+    
     visualize_model(model_conv)
     #make_movie(model_conv) # see original code...
     plt.show()
