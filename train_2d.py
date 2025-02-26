@@ -56,7 +56,7 @@ out = torchvision.utils.make_grid(inputs)
 imshow(out, title="Verify the images loaded correctly!")
 plt.show() 
 
-def train_model(model, criterion, optimizer, scheduler, num_epochs=1):
+def train_model(model, criterion, optimizer, scheduler, num_epochs=1): # scheduler change the learning rate dynamically
     start_time = time.time()
     best_loss = 1e8
     best_model_params_path = "./best_model_params.pt"
