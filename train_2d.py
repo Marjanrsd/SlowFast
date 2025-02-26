@@ -72,7 +72,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=1): # schedul
             else:
                 model.eval()   # Set model to evaluate mode
 
-            running_loss = 0.0
+            running_loss = 0.0 # accumiliated loss
 
             # Iterate over data.
             for inputs, x in dataloaders[phase]:
