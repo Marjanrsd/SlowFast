@@ -37,16 +37,11 @@ class VideoDataset(Dataset):
         # notice loadvideo returns our buffer (i.e. 4d clip tensor)
         # it is taking a filename (i.e. fname) from our dataset
         # and loading it into a 4D pytorch tensor.
-        
-        # @TODO remove!! Hack for different len vids
-        while True:
-            try:
-                buffer = self.loadvideo(self.fnames[index])
-                if buffer.shape[0] != 24: 
-                    raise Exception(":c")
-                break
-            except:
-                index = index + 1
+        buffer = self.loadvideo(self.fnames[index])
+        ## @TODO make 24 not hardcoded!
+        clip_len = buffer.shape[0]
+        err_txt = f'incorrect clip length: {clip_len} != 24'
+        assert clip_len == 24, err_txt
         
         if self.mode == 'train' or self.mode == 'training':
             # here's some data-aug
@@ -100,8 +95,8 @@ class VideoDataset(Dataset):
 
         # create a buffer. Must have dtype float, so it gets converted to a FloatTensor by Pytorch later
         start_idx = 0
-        end_idx = frame_count - 1
-        frame_count_sample = frame_count - 1
+        end_idx = frame_count
+        frame_count_sample = frame_count
         # this is how we convert our videos to single frames in 2D mode
         if self.dim == 2:
             frame_count_sample = 1
